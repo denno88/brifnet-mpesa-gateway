@@ -123,7 +123,7 @@ DARAJA_STK_PUSH_URL=https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequ
 DARAJA_STK_QUERY_URL=https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query
 
 # Public URL that receives M-Pesa callbacks
-DARAJA_CALLBACK_URL=https://your-domain.com/wp-json/brifnet/v1/mpesa/callback
+DARAJA_CALLBACK_URL=
 ```
 
 Replace the empty values with your Daraja credentials.
