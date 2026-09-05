@@ -1,0 +1,23 @@
+{
+    "name": "brifnet/brifnet-mpesa-gateway",
+    "description": "A WordPress M-Pesa payment gateway integration supporting STK Push and C2B payments.",
+    "type": "wordpress-plugin",
+    "license": "MIT",
+    "require": {
+        "php": "^8.4",
+        "vlucas/phpdotenv": "^5.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "BrifnetMpesa\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BrifnetMpesa\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^13.3"
+    }
+}
