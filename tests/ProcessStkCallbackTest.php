@@ -48,6 +48,7 @@ final class ProcessStkCallbackTest extends TestCase
                 transactionManager: $transactionManager,
                 eventIdGenerator: new PaymentEventIdGenerator(),
                 webhookQueue: $this->webhookQueue(),
+                webhookDeliveryWorker: $this->webhookWorker(),
             ),
         );
 
@@ -272,6 +273,7 @@ final class ProcessStkCallbackTest extends TestCase
                 transactionManager: $transactionManager,
                 eventIdGenerator: new PaymentEventIdGenerator(),
                 webhookQueue: $this->webhookQueue(),
+                webhookDeliveryWorker: $this->webhookWorker(),
             ),
         );
 
@@ -397,6 +399,7 @@ final class ProcessStkCallbackTest extends TestCase
                 transactionManager: $transactionManager,
                 eventIdGenerator: new PaymentEventIdGenerator(),
                 webhookQueue: $this->webhookQueue(),
+                webhookDeliveryWorker: $this->webhookWorker(),
             ),
         );
     }
@@ -426,6 +429,7 @@ final class ProcessStkCallbackTest extends TestCase
                 transactionManager: $transactionManager,
                 eventIdGenerator: new PaymentEventIdGenerator(),
                 webhookQueue: $this->webhookQueue(),
+                webhookDeliveryWorker: $this->webhookWorker(),
             ),
         );
 
@@ -469,6 +473,16 @@ final class ProcessStkCallbackTest extends TestCase
             endpointRepository: new FakeWebhookEndpointRepository(),
             deliveryRepository: new FakeWebhookDeliveryRepository(),
             payloadBuilder: new PaymentCompletedPayloadBuilder(),
+        );
+    }
+
+    private function webhookWorker(): \BrifnetMpesa\Application\WebhookDeliveryWorker
+    {
+        return new \BrifnetMpesa\Application\WebhookDeliveryWorker(
+            repository: new FakeWebhookDeliveryRepository(),
+            httpClient: new FakeWebhookHttpClient(),
+            signature: new \BrifnetMpesa\Domain\WebhookSignature(),
+            webhookSecret: 'test-secret',
         );
     }
 }

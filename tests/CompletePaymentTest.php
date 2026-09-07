@@ -14,6 +14,8 @@ use BrifnetMpesa\Domain\PaymentStatus;
 use BrifnetMpesa\Domain\PhoneNumber;
 use BrifnetMpesa\Application\PaymentCompletedPayloadBuilder;
 use BrifnetMpesa\Application\QueuePaymentCompletedWebhooks;
+use BrifnetMpesa\Application\WebhookDeliveryWorker;
+use BrifnetMpesa\Domain\WebhookSignature;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -49,6 +51,9 @@ final class CompletePaymentTest extends TestCase
             transactionManager: $transactionManager,
             eventIdGenerator: new PaymentEventIdGenerator(),
             webhookQueue: $webhookQueue,
+            webhookDeliveryWorker: $this->webhookWorker(
+                $deliveryRepository
+            ),
         );
 
         $service->execute($payment);
@@ -87,7 +92,7 @@ final class CompletePaymentTest extends TestCase
         self::assertNotNull($delivery);
 
         self::assertSame(
-            'pending',
+            'delivered',
             $delivery->status
         );
     }
@@ -120,6 +125,7 @@ final class CompletePaymentTest extends TestCase
             transactionManager: $transactionManager,
             eventIdGenerator: new PaymentEventIdGenerator(),
             webhookQueue: $this->webhookQueue(),
+            webhookDeliveryWorker: $this->webhookWorker(),
         );
 
         $this->expectException(RuntimeException::class);
@@ -164,6 +170,7 @@ final class CompletePaymentTest extends TestCase
             transactionManager: $transactionManager,
             eventIdGenerator: new PaymentEventIdGenerator(),
             webhookQueue: $this->webhookQueue(),
+            webhookDeliveryWorker: $this->webhookWorker(),
         );
 
         try {
@@ -232,6 +239,7 @@ final class CompletePaymentTest extends TestCase
             transactionManager: $transactionManager,
             eventIdGenerator: new PaymentEventIdGenerator(),
             webhookQueue: $this->webhookQueue(),
+            webhookDeliveryWorker: $this->webhookWorker(),
         );
 
         $this->expectException(RuntimeException::class);
@@ -281,6 +289,7 @@ final class CompletePaymentTest extends TestCase
             transactionManager: $transactionManager,
             eventIdGenerator: new PaymentEventIdGenerator(),
             webhookQueue: $this->webhookQueue(),
+            webhookDeliveryWorker: $this->webhookWorker(),
         );
 
         $this->expectException(RuntimeException::class);
@@ -334,6 +343,7 @@ final class CompletePaymentTest extends TestCase
             transactionManager: $transactionManager,
             eventIdGenerator: new PaymentEventIdGenerator(),
             webhookQueue: $this->webhookQueue(),
+            webhookDeliveryWorker: $this->webhookWorker(),
         );
 
         $this->expectException(RuntimeException::class);
@@ -418,6 +428,7 @@ final class CompletePaymentTest extends TestCase
             transactionManager: $transactionManager,
             eventIdGenerator: new PaymentEventIdGenerator(),
             webhookQueue: $webhookQueue,
+            webhookDeliveryWorker: $this->webhookWorker(),
         );
 
         $this->expectException(RuntimeException::class);
@@ -438,5 +449,16 @@ final class CompletePaymentTest extends TestCase
                 $transactionManager->operations
             );
         }
+    }
+
+    private function webhookWorker(
+        ?FakeWebhookDeliveryRepository $repository = null
+    ): WebhookDeliveryWorker {
+        return new WebhookDeliveryWorker(
+            repository: $repository ?? new FakeWebhookDeliveryRepository(),
+            httpClient: new FakeWebhookHttpClient(),
+            signature: new WebhookSignature(),
+            webhookSecret: 'test-secret',
+        );
     }
 }

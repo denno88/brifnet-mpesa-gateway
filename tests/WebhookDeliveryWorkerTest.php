@@ -118,8 +118,6 @@ final class WebhookDeliveryWorkerTest extends TestCase
         $repository->save($delivery);
 
         $httpClient = new FakeWebhookHttpClient();
-
-        // We'll make the fake throw for this delivery.
         $httpClient->shouldFail = true;
 
         $worker = new WebhookDeliveryWorker(
@@ -128,8 +126,6 @@ final class WebhookDeliveryWorkerTest extends TestCase
             new WebhookSignature(),
             'test-secret',
         );
-
-        $this->expectException(\RuntimeException::class);
 
         $worker->run();
 
@@ -140,6 +136,7 @@ final class WebhookDeliveryWorkerTest extends TestCase
 
         self::assertNotNull($updated);
         self::assertSame('pending', $updated->status);
+        self::assertSame(1, $updated->attempts);
     }
 
     public function test_failed_webhook_increments_attempts(): void
@@ -164,11 +161,7 @@ final class WebhookDeliveryWorkerTest extends TestCase
             'test-secret',
         );
 
-        try {
-            $worker->run();
-        } catch (\RuntimeException) {
-            // Expected for now.
-        }
+        $worker->run();
 
         $updated = $repository->findByEventIdAndUrl(
             'EVENT-123',

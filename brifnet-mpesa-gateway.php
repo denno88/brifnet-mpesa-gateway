@@ -61,6 +61,9 @@ use BrifnetMpesa\Application\RegisterWebhookEndpoint;
 use BrifnetMpesa\WordPress\WebhookEndpointController;
 use BrifnetMpesa\Application\ReactivateWebhookEndpoint;
 use BrifnetMpesa\Application\DeactivateWebhookEndpoint;
+use BrifnetMpesa\Application\WebhookDeliveryWorker;
+use BrifnetMpesa\Domain\WebhookSignature;
+use BrifnetMpesa\WordPress\WordPressWebhookHttpClient;
 
 
 $hooks = new WordPressHookRegistrar();
@@ -77,6 +80,10 @@ $paymentRepository = new WordPressPaymentRepository(
 
 $httpClient = new WordPressHttpClient(
     new NativeWordPressHttpTransport()
+);
+
+$webhookHttpClient = new WordPressWebhookHttpClient(
+    http: $httpClient,
 );
 
 $transientStore = new WordPressTransientStore();
@@ -129,12 +136,23 @@ $webhookQueue = new QueuePaymentCompletedWebhooks(
     payloadBuilder: new PaymentCompletedPayloadBuilder(),
 );
 
+$webhookDeliveryWorker = new WebhookDeliveryWorker(
+    repository: $webhookDeliveryRepository,
+    httpClient: $webhookHttpClient,
+    signature: new WebhookSignature(),
+    webhookSecret: (string) get_option(
+        'brifnet_mpesa_webhook_secret',
+        ''
+    ),
+);
+
 $completePayment = new CompletePayment(
     paymentRepository: $paymentRepository,
     eventRepository: $paymentEventRepository,
     transactionManager: $transactionManager,
     eventIdGenerator: new PaymentEventIdGenerator(),
     webhookQueue: $webhookQueue,
+    webhookDeliveryWorker: $webhookDeliveryWorker,
 );
 
 $processor = new ProcessStkCallback(

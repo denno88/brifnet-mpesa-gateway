@@ -120,16 +120,30 @@ final class WordPressWebhookEndpointRepository
         $rows = $this->database->get_results($query);
 
         return array_map(
-            fn (array $row): WebhookEndpoint => new WebhookEndpoint(
-                url: (string) $row['url'],
-                active: (bool) $row['active'],
-                events: json_decode(
-                    (string) $row['events'],
-                    true,
-                    512,
-                    JSON_THROW_ON_ERROR
-                ),
-            ),
+            function (array|\stdClass $row): WebhookEndpoint {
+                $url = is_object($row)
+                    ? $row->url
+                    : $row['url'];
+
+                $active = is_object($row)
+                    ? $row->active
+                    : $row['active'];
+
+                $events = is_object($row)
+                    ? $row->events
+                    : $row['events'];
+
+                return new WebhookEndpoint(
+                    url: (string) $url,
+                    active: (bool) $active,
+                    events: json_decode(
+                        (string) $events,
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    ),
+                );
+            },
             $rows
         );
     }

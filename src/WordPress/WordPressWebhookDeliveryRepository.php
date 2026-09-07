@@ -101,13 +101,35 @@ final class WordPressWebhookDeliveryRepository
         $rows = $this->database->get_results($query);
 
         return array_map(
-            fn (object $row): WebhookDelivery => new WebhookDelivery(
-                eventId: (string) $row->event_id,
-                url: (string) $row->url,
-                payload: (string) $row->payload,
-                status: (string) $row->status,
-                attempts: (int) $row->attempts,
-            ),
+            function (array|\stdClass $row): WebhookDelivery {
+                $eventId = is_object($row)
+                    ? $row->event_id
+                    : $row['event_id'];
+
+                $url = is_object($row)
+                    ? $row->url
+                    : $row['url'];
+
+                $payload = is_object($row)
+                    ? $row->payload
+                    : $row['payload'];
+
+                $status = is_object($row)
+                    ? $row->status
+                    : $row['status'];
+
+                $attempts = is_object($row)
+                    ? $row->attempts
+                    : $row['attempts'];
+
+                return new WebhookDelivery(
+                    eventId: (string) $eventId,
+                    url: (string) $url,
+                    payload: (string) $payload,
+                    status: (string) $status,
+                    attempts: (int) $attempts,
+                );
+            },
             $rows,
         );
     }

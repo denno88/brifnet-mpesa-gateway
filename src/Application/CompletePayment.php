@@ -17,6 +17,7 @@ final class CompletePayment
         private readonly TransactionManager $transactionManager,
         private readonly PaymentEventIdGenerator $eventIdGenerator,
         private readonly QueuePaymentCompletedWebhooks $webhookQueue,
+        private readonly WebhookDeliveryWorker $webhookDeliveryWorker,
     ) {
     }
 
@@ -43,6 +44,8 @@ final class CompletePayment
 
             throw $exception;
         }
+
+        $this->webhookDeliveryWorker->run();
     }
 
     public function executeNew(Payment $payment): void
@@ -68,5 +71,7 @@ final class CompletePayment
 
             throw $exception;
         }
+
+        $this->webhookDeliveryWorker->run();
     }
 }

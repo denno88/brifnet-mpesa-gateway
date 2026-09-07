@@ -143,6 +143,78 @@ For production, use the appropriate production Daraja credentials and production
 | `DARAJA_STK_QUERY_URL`      | Daraja STK Query endpoint            |
 | `DARAJA_CALLBACK_URL`       | Public URL used for M-Pesa callbacks |
 
+## Daraja Callback URLs
+
+The plugin provides the callback endpoints used to receive payment notifications from Safaricom Daraja.
+
+These routes are created automatically by the plugin. Clients do not need to create separate WordPress routes.
+
+For a WordPress site running at:
+
+```text
+https://example.com
+```
+
+the callback URLs are:
+
+### STK Push Callback
+
+```text
+https://example.com/wp-json/brifnet/v1/mpesa/callback
+```
+
+This URL receives the asynchronous result of an STK Push request from Safaricom Daraja.
+
+Set this URL as the callback URL when configuring the STK Push integration.
+
+The URL used by the plugin is also configured through:
+
+```env
+DARAJA_CALLBACK_URL=https://example.com/wp-json/brifnet/v1/mpesa/callback
+```
+
+### C2B Callback
+
+```text
+https://example.com/wp-json/brifnet/v1/mpesa/c2b
+```
+
+This endpoint receives C2B payment notifications from Safaricom Daraja.
+
+Use this URL when registering the C2B confirmation and validation URLs required by the Daraja C2B configuration.
+
+### Current Registration Process
+
+At this stage, the plugin **does not register the callback URLs with Safaricom automatically**.
+
+The URLs are available from the plugin's REST routes and must currently be entered manually when setting up the corresponding Daraja integration.
+
+For example:
+
+
+STK Callback:
+https://example.com/wp-json/brifnet/v1/mpesa/callback
+
+C2B:
+https://example.com/wp-json/brifnet/v1/mpesa/c2b
+
+
+The planned implementation will provide an API for registering the required URLs with Daraja directly from the plugin.
+
+Until that API is implemented, Daraja URL registration remains a manual setup step.
+
+### Callback Requirements
+
+The WordPress site receiving Daraja callbacks must be publicly accessible.
+
+For production use:
+
+* Use HTTPS.
+* Do not require normal WordPress user authentication on these callback routes.
+* Make sure the URLs are reachable from Safaricom's infrastructure.
+* Do not use `localhost` for Daraja callbacks.
+
+
 The plugin will throw a configuration error if a required environment variable is missing or empty.
 
 ## Webhook Secret
@@ -832,8 +904,17 @@ Client applications should only register events listed under **Supported Events*
 
 # Important
 
-The M-Pesa provider callback endpoints used internally by the gateway are not part of the client API and are intentionally not documented here.
+The M-Pesa provider callback endpoints are separate from the client-facing payment API.
 
-Client applications interact with the gateway through the STK and webhook APIs described above.
+The plugin currently exposes:
 
-The public API is intentionally separated from provider-specific callback handling so that client applications depend on BrifNet payment events rather than directly depending on M-Pesa provider callback formats.
+```text
+POST /wp-json/brifnet/v1/mpesa/callback
+POST /wp-json/brifnet/v1/mpesa/c2b
+```
+
+These endpoints are used by Safaricom Daraja to send payment notifications to the gateway.
+
+Client applications should normally use the STK Push API and BrifNet webhook events rather than processing the Daraja callback payloads directly.
+
+Daraja callback URL registration is currently a manual configuration step. Automatic registration through the plugin will be added in a future version.
