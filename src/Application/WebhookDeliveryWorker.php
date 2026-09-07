@@ -20,50 +20,50 @@ final class WebhookDeliveryWorker
     }
 
     public function run(): void
-{
-    
-    $deliveries = $this->repository->findPending();
+    {
+        
+        $deliveries = $this->repository->findPending();
 
-    foreach ($deliveries as $delivery) {
+        foreach ($deliveries as $delivery) {
 
-        if (!$delivery->isRetryable($this->maxAttempts)) {
+            if (!$delivery->isRetryable($this->maxAttempts)) {
 
-            $this->repository->update(
-                $delivery->markPermanentlyFailed()
-            );
+                $this->repository->update(
+                    $delivery->markPermanentlyFailed()
+                );
 
-            continue;
+                continue;
+            }
+
+            try {
+
+                $this->httpClient->send(
+                    $delivery->url,
+                    $delivery->payload,
+                    [
+                        'X-Webhook-Signature' => $this->signature->generate(
+                            $delivery->payload,
+                            $this->webhookSecret,
+                        ),
+                    ],
+                );
+
+
+                $this->repository->update(
+                    $delivery->markDelivered()
+                );
+
+
+            } catch (\Throwable $exception) {
+
+
+                $this->repository->update(
+                    $delivery->markFailed()
+                );
+
+                continue;
+            }
         }
 
-        try {
-
-            $this->httpClient->send(
-                $delivery->url,
-                $delivery->payload,
-                [
-                    'X-Webhook-Signature' => $this->signature->generate(
-                        $delivery->payload,
-                        $this->webhookSecret,
-                    ),
-                ],
-            );
-
-
-            $this->repository->update(
-                $delivery->markDelivered()
-            );
-
-
-        } catch (\Throwable $exception) {
-
-
-            $this->repository->update(
-                $delivery->markFailed()
-            );
-
-            continue;
-        }
     }
-
-}
 }
