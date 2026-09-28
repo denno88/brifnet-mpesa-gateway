@@ -23,7 +23,7 @@ final class C2BPaymentValidatorTest extends TestCase
             transactionId: 'RKT123456',
             phone: '0712345678',
             amount: 500,
-            billReferenceNumber: 'BRIF-001',
+            accountNumber: 'BRIF-001',
             transactionTime: '20260902120000',
             businessShortCode: '123456',
         );
@@ -40,7 +40,7 @@ final class C2BPaymentValidatorTest extends TestCase
             transactionId: 'RKT123456',
             phone: '12345',
             amount: 500,
-            billReferenceNumber: 'BRIF-001',
+            accountNumber: 'BRIF-001',
             transactionTime: '20260902120000',
             businessShortCode: '123456',
         );
@@ -60,7 +60,7 @@ final class C2BPaymentValidatorTest extends TestCase
             transactionId: 'RKT123456',
             phone: '0712345678',
             amount: 0,
-            billReferenceNumber: 'BRIF-001',
+            accountNumber: 'BRIF-001',
             transactionTime: '20260902120000',
             businessShortCode: '123456',
         );
@@ -80,7 +80,7 @@ final class C2BPaymentValidatorTest extends TestCase
             transactionId: '',
             phone: '0712345678',
             amount: 500,
-            billReferenceNumber: 'BRIF-001',
+            accountNumber: 'BRIF-001',
             transactionTime: '20260902120000',
             businessShortCode: '123456',
         );
@@ -94,13 +94,13 @@ final class C2BPaymentValidatorTest extends TestCase
         );
     }
 
-    public function testItRejectsEmptyBillReferenceNumber(): void
+    public function testItRejectsEmptyAccountNumber(): void
     {
         $payment = new C2BPayment(
             transactionId: 'RKT123456',
             phone: '0712345678',
             amount: 500,
-            billReferenceNumber: '',
+            accountNumber: '',
             transactionTime: '20260902120000',
             businessShortCode: '123456',
         );
@@ -109,7 +109,7 @@ final class C2BPaymentValidatorTest extends TestCase
 
         $this->assertFalse($result->accepted);
         $this->assertSame(
-            'Bill reference number cannot be empty.',
+            'Account number cannot be empty.',
             $result->errorMessage
         );
     }

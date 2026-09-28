@@ -34,10 +34,10 @@ final class C2BPaymentValidator
             );
         }
 
-        if ($payment->billReferenceNumber === '') {
+        if ($payment->accountNumber === '') {
             return new C2BValidationResult(
                 accepted: false,
-                errorMessage: 'Bill reference number cannot be empty.',
+                errorMessage: 'Account number cannot be empty.',
             );
         }
 

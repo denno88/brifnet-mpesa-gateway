@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 use BrifnetMpesa\Application\ProcessC2BPayment;
 use BrifnetMpesa\Application\PaymentCompletedPayloadBuilder;
 use BrifnetMpesa\Application\QueuePaymentCompletedWebhooks;
-
+use BrifnetMpesa\Application\DefaultPaymentReferenceGenerator;
 
 final class C2BPaymentRouteTest extends TestCase
 {
@@ -32,6 +32,7 @@ final class C2BPaymentRouteTest extends TestCase
                 webhookQueue: $this->webhookQueue(),
                 webhookDeliveryWorker: $this->webhookWorker(),
             ),
+            referenceGenerator: new DefaultPaymentReferenceGenerator(),
         );
 
         $controller = new C2BPaymentController(

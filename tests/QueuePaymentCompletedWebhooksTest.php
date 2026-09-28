@@ -122,6 +122,8 @@ final class QueuePaymentCompletedWebhooksTest extends TestCase
                 phone: new PhoneNumber('0712345678'),
                 amount: 500,
                 channel: PaymentChannel::STK,
+                checkoutRequestId: 'ws_CO_67890',
+                transactionId: 'ABC123XYZ',
             ),
             occurredAt: new \DateTimeImmutable(
                 '2026-09-04T12:30:00+03:00'
@@ -144,7 +146,7 @@ final class QueuePaymentCompletedWebhooksTest extends TestCase
         $this->assertNotNull($delivery);
 
         $this->assertSame(
-            '{"event_id":"evt-123","event":"payment.completed","occurred_at":"2026-09-04T12:30:00+03:00","data":{"reference":"PAY-123","phone":"0712345678","amount":500,"channel":"STK"}}',
+            '{"event_id":"evt-123","event":"payment.completed","occurred_at":"2026-09-04T12:30:00+03:00","data":{"reference":"PAY-123","phone":"0712345678","amount":500,"channel":"STK","provider_reference":"ws_CO_67890","provider_transaction_id":"ABC123XYZ"}}',
             $delivery->payload
         );
     }

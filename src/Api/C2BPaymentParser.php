@@ -28,7 +28,7 @@ final class C2BPaymentParser
         $transactionId = $data['TransID'] ?? null;
         $phone = $data['MSISDN'] ?? null;
         $amount = $data['TransAmount'] ?? null;
-        $billReference = $data['BillRefNumber'] ?? null;
+        $accountNumber = $data['BillRefNumber'] ?? null;
         $transactionTime = $data['TransTime'] ?? null;
         $businessShortCode = $data['BusinessShortCode'] ?? null;
 
@@ -51,11 +51,11 @@ final class C2BPaymentParser
         }
 
         if (
-            !is_string($billReference) ||
-            $billReference === ''
+            !is_string($accountNumber) ||
+            $accountNumber === ''
         ) {
             throw new InvalidArgumentException(
-                'Missing bill reference number.'
+                'Missing account number.'
             );
         }
 
@@ -81,7 +81,7 @@ final class C2BPaymentParser
             transactionId: $transactionId,
             phone: $this->normalizePhoneNumber($phone),
             amount: (int) $amount,
-            billReferenceNumber: $billReference,
+            accountNumber: $accountNumber,
             transactionTime: $transactionTime,
             businessShortCode: $businessShortCode,
         );

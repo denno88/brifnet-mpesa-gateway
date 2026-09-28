@@ -64,7 +64,7 @@ use BrifnetMpesa\Application\DeactivateWebhookEndpoint;
 use BrifnetMpesa\Application\WebhookDeliveryWorker;
 use BrifnetMpesa\Domain\WebhookSignature;
 use BrifnetMpesa\WordPress\WordPressWebhookHttpClient;
-
+use BrifnetMpesa\Application\DefaultPaymentReferenceGenerator;
 
 $hooks = new WordPressHookRegistrar();
 
@@ -175,6 +175,7 @@ $c2bProcessor = new ProcessC2BPayment(
     validator: new C2BPaymentValidator(),
     paymentRepository: $paymentRepository,
     completePayment: $completePayment,
+    referenceGenerator: new DefaultPaymentReferenceGenerator(),
 );
 
 $c2bController = new C2BPaymentController(

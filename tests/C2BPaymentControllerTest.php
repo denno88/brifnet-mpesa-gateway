@@ -16,6 +16,7 @@ use BrifnetMpesa\Application\CompletePayment;
 use BrifnetMpesa\Application\PaymentEventIdGenerator;
 use BrifnetMpesa\Application\PaymentCompletedPayloadBuilder;
 use BrifnetMpesa\Application\QueuePaymentCompletedWebhooks;
+use BrifnetMpesa\Application\DefaultPaymentReferenceGenerator;
 
 final class C2BPaymentControllerTest extends TestCase
 {
@@ -35,6 +36,7 @@ final class C2BPaymentControllerTest extends TestCase
                 webhookQueue: $this->webhookQueue(),
                 webhookDeliveryWorker: $this->webhookWorker(),
             ),
+            referenceGenerator: new DefaultPaymentReferenceGenerator(),
         );
 
         $controller = new C2BPaymentController(
@@ -84,6 +86,7 @@ final class C2BPaymentControllerTest extends TestCase
                 webhookQueue: $this->webhookQueue(),
                 webhookDeliveryWorker: $this->webhookWorker(),
             ),
+            referenceGenerator: new DefaultPaymentReferenceGenerator(),
         );
 
         $controller = new C2BPaymentController(
@@ -123,6 +126,7 @@ final class C2BPaymentControllerTest extends TestCase
                 webhookQueue: $this->webhookQueue(),
                 webhookDeliveryWorker: $this->webhookWorker(),
             ),
+            referenceGenerator: new DefaultPaymentReferenceGenerator(),
         );
 
         $controller = new C2BPaymentController(

@@ -18,6 +18,8 @@ use BrifnetMpesa\Application\CompletePayment;
 use BrifnetMpesa\Application\PaymentEventIdGenerator;
 use BrifnetMpesa\Application\PaymentCompletedPayloadBuilder;
 use BrifnetMpesa\Application\QueuePaymentCompletedWebhooks;
+use BrifnetMpesa\Application\DefaultPaymentReferenceGenerator;
+
 
 final class ProcessC2BPaymentTest extends TestCase
 {
@@ -51,6 +53,7 @@ final class ProcessC2BPaymentTest extends TestCase
             validator: new C2BPaymentValidator(),
             paymentRepository: $this->repository,
             completePayment: $this->completePayment,
+            referenceGenerator: new DefaultPaymentReferenceGenerator(),
         );
     }
 
@@ -247,6 +250,7 @@ final class ProcessC2BPaymentTest extends TestCase
             validator: new C2BPaymentValidator(),
             paymentRepository: $repository,
             completePayment: $this->completePayment,
+            referenceGenerator: new DefaultPaymentReferenceGenerator(),
         );
 
         $payload = json_encode([

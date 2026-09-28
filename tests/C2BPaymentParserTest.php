@@ -33,7 +33,7 @@ final class C2BPaymentParserTest extends TestCase
         $this->assertSame('RKT123456', $payment->transactionId);
         $this->assertSame('0712345678', $payment->phone);
         $this->assertSame(500, $payment->amount);
-        $this->assertSame('BRIF-001', $payment->billReferenceNumber);
+        $this->assertSame('BRIF-001', $payment->accountNumber);
         $this->assertSame('20260902120000', $payment->transactionTime);
         $this->assertSame('123456', $payment->businessShortCode);
     }

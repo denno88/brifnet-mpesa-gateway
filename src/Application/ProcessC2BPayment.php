@@ -6,14 +6,13 @@ namespace BrifnetMpesa\Application;
 
 use BrifnetMpesa\Api\C2BPaymentParser;
 use BrifnetMpesa\Api\C2BPaymentValidator;
+use BrifnetMpesa\Domain\DuplicatePaymentException;
 use BrifnetMpesa\Domain\Payment;
 use BrifnetMpesa\Domain\PaymentChannel;
 use BrifnetMpesa\Domain\PaymentReference;
 use BrifnetMpesa\Domain\PaymentRepository;
 use BrifnetMpesa\Domain\PaymentStatus;
 use BrifnetMpesa\Domain\PhoneNumber;
-use BrifnetMpesa\Domain\DuplicatePaymentException;
-use BrifnetMpesa\Application\CompletePayment;
 
 final class ProcessC2BPayment
 {
@@ -22,6 +21,7 @@ final class ProcessC2BPayment
         private readonly C2BPaymentValidator $validator,
         private readonly PaymentRepository $paymentRepository,
         private readonly CompletePayment $completePayment,
+        private readonly PaymentReferenceGenerator $referenceGenerator,
     ) {
     }
 
@@ -39,6 +39,10 @@ final class ProcessC2BPayment
             );
         }
 
+        /*
+         * TransID is the provider transaction ID and therefore
+         * the idempotency key for C2B payments.
+         */
         $existingPayment = $this->paymentRepository
             ->findByTransactionId(
                 $c2bPayment->transactionId
@@ -50,7 +54,7 @@ final class ProcessC2BPayment
 
         $payment = new Payment(
             reference: new PaymentReference(
-                $c2bPayment->billReferenceNumber
+                $this->referenceGenerator->generate()
             ),
             phone: new PhoneNumber(
                 $c2bPayment->phone
@@ -59,11 +63,16 @@ final class ProcessC2BPayment
             channel: PaymentChannel::C2B,
             status: PaymentStatus::COMPLETED,
             transactionId: $c2bPayment->transactionId,
+            accountNumber: $c2bPayment->accountNumber,
         );
 
         try {
             $this->completePayment->executeNew($payment);
         } catch (DuplicatePaymentException) {
+            /*
+             * Another request may have processed the same TransID
+             * concurrently. Return the payment that won the race.
+             */
             $existingPayment = $this->paymentRepository
                 ->findByTransactionId(
                     $c2bPayment->transactionId

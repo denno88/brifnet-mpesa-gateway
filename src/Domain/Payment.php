@@ -17,8 +17,7 @@ final readonly class Payment
         public ?string $merchantRequestId = null,
         public ?string $checkoutRequestId = null,
         public ?string $transactionId = null,
-
-
+        public ?string $accountNumber = null,
     ) {
         if ($this->amount <= 0) {
             throw new InvalidArgumentException(
@@ -30,7 +29,6 @@ final readonly class Payment
     public function attachStkIdentifiers(
         string $merchantRequestId,
         string $checkoutRequestId,
-        
     ): self {
         if ($merchantRequestId === '') {
             throw new InvalidArgumentException(
@@ -53,8 +51,7 @@ final readonly class Payment
             merchantRequestId: $merchantRequestId,
             checkoutRequestId: $checkoutRequestId,
             transactionId: $this->transactionId,
-
-
+            accountNumber: $this->accountNumber,
         );
     }
 
@@ -76,9 +73,9 @@ final readonly class Payment
             merchantRequestId: $this->merchantRequestId,
             checkoutRequestId: $this->checkoutRequestId,
             transactionId: $transactionId,
+            accountNumber: $this->accountNumber,
         );
     }
-
 
     public function complete(): self
     {
@@ -97,6 +94,7 @@ final readonly class Payment
             merchantRequestId: $this->merchantRequestId,
             checkoutRequestId: $this->checkoutRequestId,
             transactionId: $this->transactionId,
+            accountNumber: $this->accountNumber,
         );
     }
 
@@ -117,7 +115,7 @@ final readonly class Payment
             merchantRequestId: $this->merchantRequestId,
             checkoutRequestId: $this->checkoutRequestId,
             transactionId: $this->transactionId,
-
+            accountNumber: $this->accountNumber,
         );
     }
 }

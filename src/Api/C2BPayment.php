@@ -10,7 +10,7 @@ final readonly class C2BPayment
         public string $transactionId,
         public string $phone,
         public int $amount,
-        public string $billReferenceNumber,
+        public string $accountNumber,
         public string $transactionTime,
         public string $businessShortCode,
     ) {
