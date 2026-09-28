@@ -37,6 +37,7 @@ final class WordPressPaymentRepository implements PaymentRepository
                 'merchant_request_id' => $payment->merchantRequestId,
                 'checkout_request_id' => $payment->checkoutRequestId,
                 'trans_id' => $payment->transactionId,
+                'bill_ref_number' => $payment->accountNumber,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -44,6 +45,7 @@ final class WordPressPaymentRepository implements PaymentRepository
                 '%s',
                 '%s',
                 '%d',
+                '%s',
                 '%s',
                 '%s',
                 '%s',
@@ -83,11 +85,13 @@ final class WordPressPaymentRepository implements PaymentRepository
                 'merchant_request_id' => $payment->merchantRequestId,
                 'checkout_request_id' => $payment->checkoutRequestId,
                 'trans_id' => $payment->transactionId,
+                'bill_ref_number' => $payment->accountNumber,
             ],
             [
                 'reference' => $payment->reference->value,
             ],
             [
+                '%s',
                 '%s',
                 '%s',
                 '%s',
@@ -117,7 +121,8 @@ final class WordPressPaymentRepository implements PaymentRepository
                 payment_channel,
                 merchant_request_id,
                 checkout_request_id,
-                trans_id
+                trans_id,
+                bill_ref_number
             FROM {$this->tableName}
             WHERE checkout_request_id = %s
             LIMIT 1",
@@ -150,9 +155,11 @@ final class WordPressPaymentRepository implements PaymentRepository
             checkoutRequestId: isset($row->checkout_request_id)
                 ? (string) $row->checkout_request_id
                 : null,
-
             transactionId: isset($row->trans_id)
                 ? (string) $row->trans_id
+                : null,
+            accountNumber: isset($row->bill_ref_number)
+                ? (string) $row->bill_ref_number
                 : null,
         );
     }
@@ -169,7 +176,8 @@ final class WordPressPaymentRepository implements PaymentRepository
                 payment_channel,
                 merchant_request_id,
                 checkout_request_id,
-                trans_id
+                trans_id,
+                bill_ref_number
             FROM {$this->tableName}
             WHERE trans_id = %s
             LIMIT 1",
@@ -204,6 +212,9 @@ final class WordPressPaymentRepository implements PaymentRepository
                 : null,
             transactionId: isset($row->trans_id)
                 ? (string) $row->trans_id
+                : null,
+            accountNumber: isset($row->bill_ref_number)
+                ? (string) $row->bill_ref_number
                 : null,
         );
     }

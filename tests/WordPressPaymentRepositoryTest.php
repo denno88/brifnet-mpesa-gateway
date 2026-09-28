@@ -30,7 +30,10 @@ final class WordPressPaymentRepositoryTest extends TestCase
             reference: new PaymentReference('BRIF-1001'),
             phone: new PhoneNumber('0712345678'),
             amount: 500,
-            channel: PaymentChannel::STK,
+            channel: PaymentChannel::C2B,
+            status: PaymentStatus::COMPLETED,
+            transactionId: 'RKT1001',
+            accountNumber: 'KAM100',
         );
 
         $repository->save($payment);
@@ -60,13 +63,18 @@ final class WordPressPaymentRepositoryTest extends TestCase
         );
 
         $this->assertSame(
-            PaymentStatus::PENDING->value,
+            PaymentStatus::COMPLETED->value,
             $insert['data']['status']
         );
 
         $this->assertSame(
-            PaymentChannel::STK->value,
+            PaymentChannel::C2B->value,
             $insert['data']['payment_channel']
+        );
+
+        $this->assertSame(
+            'KAM100',
+            $insert['data']['bill_ref_number']
         );
     }
 
@@ -259,6 +267,7 @@ final class WordPressPaymentRepositoryTest extends TestCase
             'merchant_request_id' => null,
             'checkout_request_id' => null,
             'trans_id' => 'RKT123456',
+            'bill_ref_number' => 'KAM100',
         ];
 
         $repository = new WordPressPaymentRepository(
@@ -283,6 +292,11 @@ final class WordPressPaymentRepositoryTest extends TestCase
         $this->assertSame(
             'COMPLETED',
             $payment->status->value
+        );
+
+        $this->assertSame(
+            'KAM100',
+            $payment->accountNumber
         );
     }
 
