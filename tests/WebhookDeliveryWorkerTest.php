@@ -236,38 +236,106 @@ final class WebhookDeliveryWorkerTest extends TestCase
         self::assertNull($httpClient->url);
     }
 
-    public function test_it_sends_a_webhook_signature(): void
+    public function test_it_sends_a_timestamp_and_signed_webhook(): void
     {
         $repository = new FakeWebhookDeliveryRepository();
 
-        $delivery = new WebhookDelivery(
-            eventId: 'evt-123',
-            url: 'https://example.com/webhook',
-            payload: '{"reference":"PAY-123"}',
+        $payload = '{"reference":"PAY-123"}';
+
+        $repository->save(
+            new WebhookDelivery(
+                eventId: 'evt-123',
+                url: 'https://example.com/webhook',
+                payload: $payload,
+            )
         );
 
-        $repository->save($delivery);
-
         $httpClient = new FakeWebhookHttpClient();
-
-        $signature = new WebhookSignature();
 
         $worker = new WebhookDeliveryWorker(
             repository: $repository,
             httpClient: $httpClient,
-            signature: $signature,
+            signature: new WebhookSignature(),
             webhookSecret: 'test-secret',
         );
 
         $worker->run();
 
+        self::assertArrayHasKey(
+            'X-BrifNet-Timestamp',
+            $httpClient->headers
+        );
+
+        self::assertArrayHasKey(
+            'X-BrifNet-Signature',
+            $httpClient->headers
+        );
+
+        $timestamp = $httpClient->headers['X-BrifNet-Timestamp'];
+
+        self::assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/',
+            $timestamp
+        );
+
+        $expectedSignature = hash_hmac(
+            'sha256',
+            $timestamp . '.' . $payload,
+            'test-secret',
+        );
+
         self::assertSame(
-            hash_hmac(
+            'sha256=' . $expectedSignature,
+            $httpClient->headers['X-BrifNet-Signature']
+        );
+    }
+
+    public function test_signature_is_not_generated_from_payload_alone(): void
+    {
+        $repository = new FakeWebhookDeliveryRepository();
+
+        $payload = '{"reference":"PAY-123"}';
+
+        $repository->save(
+            new WebhookDelivery(
+                eventId: 'evt-123',
+                url: 'https://example.com/webhook',
+                payload: $payload,
+            )
+        );
+
+        $httpClient = new FakeWebhookHttpClient();
+
+        $worker = new WebhookDeliveryWorker(
+            repository: $repository,
+            httpClient: $httpClient,
+            signature: new WebhookSignature(),
+            webhookSecret: 'test-secret',
+        );
+
+        $worker->run();
+
+        $timestamp = $httpClient->headers['X-BrifNet-Timestamp'];
+        $actualSignature = $httpClient->headers['X-BrifNet-Signature'];
+
+        $oldSignature = hash_hmac(
+            'sha256',
+            $payload,
+            'test-secret',
+        );
+
+        self::assertNotSame(
+            $oldSignature,
+            $actualSignature
+        );
+
+        self::assertSame(
+            'sha256=' . hash_hmac(
                 'sha256',
-                '{"reference":"PAY-123"}',
+                $timestamp . '.' . $payload,
                 'test-secret',
             ),
-            $httpClient->headers['X-Webhook-Signature']
+            $actualSignature
         );
     }
 

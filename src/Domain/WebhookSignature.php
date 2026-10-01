@@ -9,10 +9,11 @@ final class WebhookSignature
     public function generate(
         string $payload,
         string $secret,
+        string $timestamp,
     ): string {
         return hash_hmac(
             'sha256',
-            $payload,
+            $timestamp . '.' .$payload,
             $secret,
         );
     }

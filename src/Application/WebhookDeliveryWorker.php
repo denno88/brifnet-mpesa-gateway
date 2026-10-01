@@ -36,15 +36,20 @@ final class WebhookDeliveryWorker
             }
 
             try {
+                $timestamp = gmdate('Y-m-d\TH:i:s\Z');
+
+                $signature = $this->signature->generate(
+                    payload: $delivery->payload,
+                    secret: $this->webhookSecret,
+                    timestamp: $timestamp,
+                );
 
                 $this->httpClient->send(
                     $delivery->url,
                     $delivery->payload,
                     [
-                        'X-Webhook-Signature' => $this->signature->generate(
-                            $delivery->payload,
-                            $this->webhookSecret,
-                        ),
+                        'X-BrifNet-Timestamp' => $timestamp,
+                        'X-BrifNet-Signature' => 'sha256=' . $signature,
                     ],
                 );
 
