@@ -467,6 +467,45 @@ final class ProcessStkCallbackTest extends TestCase
         );
     }
 
+    public function testCallbackPhoneNumberInInternationalFormatIsNormalized(): void
+    {
+        $parser = new StkCallbackParser();
+
+        $payload = json_encode([
+            'Body' => [
+                'stkCallback' => [
+                    'MerchantRequestID' => '29115-123456789',
+                    'CheckoutRequestID' => 'ws_CO_123456789',
+                    'ResultCode' => 0,
+                    'ResultDesc' => 'The service request is processed successfully.',
+                    'CallbackMetadata' => [
+                        'Item' => [
+                            [
+                                'Name' => 'Amount',
+                                'Value' => 500,
+                            ],
+                            [
+                                'Name' => 'MpesaReceiptNumber',
+                                'Value' => 'QAB123XYZ',
+                            ],
+                            [
+                                'Name' => 'PhoneNumber',
+                                'Value' => 254712345678,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ], JSON_THROW_ON_ERROR);
+
+        $result = $parser->parse($payload);
+
+        $this->assertSame(
+            '0712345678',
+            $result->phone
+        );
+    }
+
     private function webhookQueue(): QueuePaymentCompletedWebhooks
     {
         return new QueuePaymentCompletedWebhooks(
